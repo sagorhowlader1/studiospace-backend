@@ -8,6 +8,7 @@ const app = express();
 const port = 8000
 
 app.use(cors())
+app.use(express.json())
 
 
 const client = new MongoClient(process.env.MONGODB_URI);
@@ -24,13 +25,20 @@ export async function connectToMongoDB() {
 
 const mongoClient = await connectToMongoDB();
 const db = mongoClient.db("studiospace")
+const studioCollection = db.collection("studios")
+
+
+app.post('/add-new-studio', async(req, res) => {
+  const data = req.body
+  const result = await studioCollection.insertOne(data)
+
+    console.log(result)
+  res.send(result)
+})
 
 
 
-
-
-
-// http://localhost:8000
+// http://localhost:8000/add-new-studio
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
