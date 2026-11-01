@@ -26,6 +26,7 @@ export async function connectToMongoDB() {
 const mongoClient = await connectToMongoDB();
 const db = mongoClient.db("studiospace")
 const studioCollection = db.collection("studios")
+const bookingCollection = db.collection("bookings")
 
 
 app.post('/add-new-studio', async(req, res) => {
@@ -55,7 +56,13 @@ app.get('/featured-studios', async (req, res) => {
 })
 
 
-// http://localhost:8000/featured-studios
+app.post('/studio/book', async (req, res) => {
+  const data = req.body
+  const result = await bookingCollection.insertOne(data)
+  res.send(result)
+})
+
+// http://localhost:8000/my-bookings-page
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
