@@ -49,8 +49,13 @@ app.get('/explore-studios/:id', async (req, res)=>{
   res.send(result)
 })
 
+app.get('/featured-studios', async (req, res) => {
+  const result = await studioCollection.find().limit(6).toArray()
+  res.send(result)
+})
 
-// http://localhost:8000/add-new-studio
+
+// http://localhost:8000/featured-studios
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
