@@ -50,6 +50,44 @@ app.get('/explore-studios/:id', async (req, res)=>{
   res.send(result)
 })
 
+
+
+// app.get('/my-listings', async(req, res)=>{
+//     console.log("My Listings API Called");
+//   try{
+
+//     const result = await studioCollection.find().toArray()
+//     res.status(200).send(result);
+//   }catch (error){
+//     console.log(error)
+//     res.status(500).send({message: "Inter"})
+//   }
+// })
+
+
+app.get('/my-listings/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const result = await studioCollection
+      .find({ email: email })
+      .toArray();
+
+    res.send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: 'Failed to fetch studio listings',
+    });
+  }
+});
+
+
+
+
+
+
+
 app.get('/featured-studios', async (req, res) => {
   const result = await studioCollection.find().limit(6).toArray()
   res.send(result)
@@ -62,7 +100,17 @@ app.post('/studio/book', async (req, res) => {
   res.send(result)
 })
 
-// http://localhost:8000/my-bookings-page
+
+app.get('/my-bookings/:email', async(req, res) => {
+  const email = req.params.email
+  const result = await bookingCollection.find({email:email}).toArray()
+  res.send(result)
+})
+
+
+
+
+// http://localhost:8000/my-bookings/:email
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
