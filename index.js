@@ -44,10 +44,23 @@ app.get('/explore-studios', async (req, res) => {
 })
 
 
-app.get('/explore-studios/:id', async (req, res)=>{
-  const {id} = req.params
-  const result = await studioCollection.findOne({_id: new ObjectId(id)})
-  res.send(result)
+app.get('/explore-studios/:id', 
+//   (req, res, next) => {
+//   const authHeader = req.headers.authorization
+//   console.log(authHeader, 'not a data')
+
+//   if(authHeader!=="user logged in"){
+//     return res.status(401).send({msg: 'Unauthorization!'})
+//   }
+
+//   next()
+// }, 
+async (req, res)=>{
+  
+
+  const {id} = req.params;
+  const result = await studioCollection.findOne({_id: new ObjectId(id)});
+  res.send(result);
 })
 
 
@@ -65,24 +78,138 @@ app.get('/explore-studios/:id', async (req, res)=>{
 // })
 
 
+
 app.get('/my-listings/:email', async (req, res) => {
-  try {
-    const { email } = req.params;
+    try {
+        const { email } = req.params;
 
-    const result = await studioCollection
-      .find({ email: email })
-      .toArray();
+        const result = await studioCollection
+            .find({ ownerEmail: email })
+            .toArray();
 
-    res.send(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({
-      message: 'Failed to fetch studio listings',
-    });
-  }
+        console.log("Requested Email:", email);
+        console.log("Matched Studios:", result.length);
+
+        res.status(200).send(result);
+
+    } catch (error) {
+        console.error("My Listings Error:", error);
+
+        res.status(500).send({
+            message: "Failed to fetch studio listings"
+        });
+    }
 });
 
 
+
+
+
+
+// Get single studio for editing
+app.get('/my-listings/edit/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).send({
+                message: "Invalid studio ID"
+            });
+        }
+
+        const result = await studioCollection.findOne({
+            _id: new ObjectId(id)
+        });
+
+        if (!result) {
+            return res.status(404).send({
+                message: "Studio not found"
+            });
+        }
+
+        res.send(result);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            message: "Failed to fetch studio"
+        });
+    }
+});
+
+
+
+
+app.patch('/my-listings/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { ownerEmail, ...updatedData } = req.body;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).send({
+                message: "Invalid studio ID"
+            });
+        }
+
+        const result = await studioCollection.updateOne(
+            {
+                _id: new ObjectId(id),
+                ownerEmail: ownerEmail
+            },
+            {
+                $set: updatedData
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).send({
+                message: "Studio not found"
+            });
+        }
+
+        res.send({
+            success: true,
+            message: "Studio updated successfully"
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).send({
+            message: "Failed to update studio"
+        });
+    }
+});
+
+
+
+
+app.delete('/my-listings/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { ownerEmail } = req.body;
+
+        const result = await studioCollection.deleteOne({
+            _id: new ObjectId(id),
+            ownerEmail: ownerEmail
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).send({
+                message: "Studio not found"
+            });
+        }
+
+        res.send({
+            success: true,
+            message: "Studio deleted successfully"
+        });
+    } catch (error) {
+        res.status(500).send({
+            message: "Failed to delete studio"
+        });
+    }
+});
 
 
 
@@ -94,6 +221,10 @@ app.get('/featured-studios', async (req, res) => {
 })
 
 
+
+
+
+
 app.post('/studio/book', async (req, res) => {
   const data = req.body
   const result = await bookingCollection.insertOne(data)
@@ -101,8 +232,55 @@ app.post('/studio/book', async (req, res) => {
 })
 
 
+
+
+
+
+
+app.post('/my-bookings', async (req, res) => {
+  const data = req.body
+  const result = await bookingCollection.insertOne(data)
+  res.send(result)
+})
+
+
+
+
+
+
+app.delete('/my-bookings/:id/cancel', async (req, res) => {
+    const { id } = req.params;
+
+    const result = await bookingCollection.updateOne(
+        {
+            _id: new ObjectId(id),
+            status: "Pending"
+        },
+        {
+            $set: {
+                status: "Cancelled"
+            }
+        }
+    );
+
+    if (result.modifiedCount === 0) {
+        return res.status(400).send({
+            message: "Booking cannot be cancelled"
+        });
+    }
+
+    res.send({
+        success: true,
+        message: "Booking cancelled successfully"
+    });
+});
+
+
+
+
+
 app.get('/my-bookings/:email', async(req, res) => {
-  const email = req.params.email
+  const {email} = req.params
   const result = await bookingCollection.find({email:email}).toArray()
   res.send(result)
 })
