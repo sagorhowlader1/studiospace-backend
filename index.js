@@ -44,38 +44,11 @@ app.get('/explore-studios', async (req, res) => {
 })
 
 
-app.get('/explore-studios/:id', 
-//   (req, res, next) => {
-//   const authHeader = req.headers.authorization
-//   console.log(authHeader, 'not a data')
-
-//   if(authHeader!=="user logged in"){
-//     return res.status(401).send({msg: 'Unauthorization!'})
-//   }
-
-//   next()
-// }, 
-async (req, res)=>{
-  
-
+app.get('/explore-studios/:id', async (req, res)=>{
   const {id} = req.params;
   const result = await studioCollection.findOne({_id: new ObjectId(id)});
   res.send(result);
 })
-
-
-
-// app.get('/my-listings', async(req, res)=>{
-//     console.log("My Listings API Called");
-//   try{
-
-//     const result = await studioCollection.find().toArray()
-//     res.status(200).send(result);
-//   }catch (error){
-//     console.log(error)
-//     res.status(500).send({message: "Inter"})
-//   }
-// })
 
 
 
@@ -103,10 +76,6 @@ app.get('/my-listings/:email', async (req, res) => {
 
 
 
-
-
-
-// Get single studio for editing
 app.get('/my-listings/edit/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -199,7 +168,6 @@ app.delete('/my-listings/:id', async (req, res) => {
                 message: "Studio not found"
             });
         }
-
         res.send({
             success: true,
             message: "Studio deleted successfully"
@@ -213,15 +181,10 @@ app.delete('/my-listings/:id', async (req, res) => {
 
 
 
-
-
 app.get('/featured-studios', async (req, res) => {
   const result = await studioCollection.find().limit(6).toArray()
   res.send(result)
 })
-
-
-
 
 
 
@@ -233,18 +196,11 @@ app.post('/studio/book', async (req, res) => {
 
 
 
-
-
-
-
 app.post('/my-bookings', async (req, res) => {
   const data = req.body
   const result = await bookingCollection.insertOne(data)
   res.send(result)
 })
-
-
-
 
 
 
@@ -276,9 +232,6 @@ app.delete('/my-bookings/:id/cancel', async (req, res) => {
 });
 
 
-
-
-
 app.get('/my-bookings/:email', async(req, res) => {
   const {email} = req.params
   const result = await bookingCollection.find({email:email}).toArray()
@@ -288,7 +241,7 @@ app.get('/my-bookings/:email', async(req, res) => {
 
 
 
-// http://localhost:8000/my-bookings/:email
+// http://localhost:8000/
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
